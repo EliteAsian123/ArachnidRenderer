@@ -26,9 +26,9 @@ public class Time {
 
     public static void updateTime(boolean outputFps) {
         long currentTime = getTime();
-        deltaTime = currentTime - lastFrameTime;
+        deltaTime = (currentTime - lastFrameTime) / (float) SECOND;
 
-        frameCounter += deltaTime;
+        frameCounter += deltaTime * SECOND;
         if (frameCounter >= Time.SECOND) {
             frameCount = frames;
 
@@ -42,7 +42,7 @@ public class Time {
             frames++;
         }
 
-        lastFrameTime = getTime();
+        lastFrameTime = currentTime;
     }
 
 }
