@@ -14,6 +14,8 @@ import static org.lwjgl.stb.STBImage.*;
 
 public class FileLoader {
 
+    private static String errorTexturePath;
+
     public static String readTextFile(String file) {
         StringBuilder fileText = new StringBuilder();
 
@@ -53,7 +55,12 @@ public class FileLoader {
                 System.err.println("Type is not allowed in image.");
             }
             if (data == null) {
-                throw new RuntimeException(stbi_failure_reason());
+                data = stbi_load(errorTexturePath, w, h, comp, 3);
+                if (data == null) {
+                    throw new RuntimeException(stbi_failure_reason() + ". Error file.");
+                } else {
+                    System.err.println("Unable to load texture file. Loading error file.");
+                }
             }
 
             width = w.get();
@@ -61,6 +68,10 @@ public class FileLoader {
         }
 
         return new Texture(width, height, data, type);
+    }
+
+    public static void setErrorTexturePath(String file) {
+        errorTexturePath = file;
     }
 
 }

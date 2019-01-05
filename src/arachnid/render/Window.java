@@ -8,11 +8,17 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.system.MemoryStack.*;
 
 
 public class Window {
+
+    public static int FPS_NO_LIMIT = 0;
+    public static int FPS_NORMAL = 1;
+    public static int FPS_HALF = 2;
 
     private int width;
     private int height;
@@ -59,6 +65,11 @@ public class Window {
 
     public boolean windowOpen() {
         return !glfwWindowShouldClose(window);
+    }
+
+    public void setFPSCap(int cap) {
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(cap);
     }
 
     public long getWindow() {

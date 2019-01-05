@@ -16,16 +16,14 @@ public class TestRender {
 
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
-    private static final String TITLE = "Arachnid Renderer V0.05";
+    private static final String TITLE = "Arachnid Renderer V0.051";
 
     private static float mouseX;
     private static float mouseY;
 
     /*
-
                             CREDIT TO THE JOML FOR PROVIDING THE FIRSTPERSON SOURCE CODE.
         https://github.com/JOML-CI/joml-lwjgl3-demos/blob/master/src/org/joml/lwjgl/FirstPersonCameraDemo.java
-
      */
 
     public static void main(String[] args) {
@@ -54,6 +52,8 @@ public class TestRender {
         });
 
         glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        FileLoader.setErrorTexturePath("res/textures/error.png");
 
         float[] vertices = {
                 //FRONT FACE
@@ -147,47 +147,66 @@ public class TestRender {
 
         };
 
+        float[] verticesPlayArea = {
+                //FLOOR
+                1, 0, 1,
+                -1, 0, 1,
+                -1, 0, -1,
+                1, 0, -1,
+
+                //RAMP
+                0.5f, 0, 0,
+                0, 0, 0,
+                0, 0, -0.5f,
+                0.5f, 0, -0.5f,
+
+                0, 0.1f, -0.5f,
+                0.5f, 0.1f, -0.5f
+
+        };
+
+        int[] indicesPlayArea = {
+                0, 1, 2,
+                2, 3, 0,
+
+                6, 7, 9,
+                9, 8, 6,
+
+                4, 9, 7,
+                5, 6, 8,
+
+                9, 4, 5,
+                5, 8, 9
+        };
+
+        float[] otherDataPlayArea = {
+                //TEX COORDS
+                -10, -10,
+                10, -10,
+                10, 10,
+                -10, 10
+
+                //I'm not good with texture coords so I didn't add any for the ramp
+        };
+
         Shader shader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader.vert"),
                 FileLoader.readTextFile("res/shaders/simpleShader.frag"));
 
         RenderObject object = new RenderObject(vertices, indices);
         object.addOBO(1, 2, otherData);
 
-        Vector3f[] objectPositions = {
-                new Vector3f(0, 0, -3),
-                new Vector3f(-1, 0, -3),
-                new Vector3f(1, 0 , -3),
-                new Vector3f(0, -1, -3),
-                new Vector3f(-1, -1, -3),
-                new Vector3f(1, -1, -3),
-                new Vector3f(0, 1, -3),
-                new Vector3f(-1, 1, -3),
-                new Vector3f(1, 1, -3),
+        object.getTransform().translate(new Vector3f(-2, 0, -3));
 
-                new Vector3f(0, 0, -4),
-                new Vector3f(-1, 0, -4),
-                new Vector3f(1, 0 , -4),
-                new Vector3f(0, -1, -4),
-                new Vector3f(-1, -1, -4),
-                new Vector3f(1, -1, -4),
-                new Vector3f(0, 1, -4),
-                new Vector3f(-1, 1, -4),
-                new Vector3f(1, 1, -4),
+        RenderObject playArea = new RenderObject(verticesPlayArea, indicesPlayArea);
+        playArea.addOBO(1, 2, otherDataPlayArea);
 
-                new Vector3f(0, 0, -5),
-                new Vector3f(-1, 0, -5),
-                new Vector3f(1, 0 , -5),
-                new Vector3f(0, -1, -5),
-                new Vector3f(-1, -1, -5),
-                new Vector3f(1, -1, -5),
-                new Vector3f(0, 1, -5),
-                new Vector3f(-1, 1, -5),
-                new Vector3f(1, 1, -5)
-        };
+        playArea.getTransform().translate(new Vector3f(0, -0.5f, 0));
+        playArea.getTransform().scale(10);
 
         Texture.textureParam(Texture.REPEAT, Texture.LINEAR, Texture.MIPMAP_LINEAR);
 
-        Texture texture = FileLoader.readPNGFile("res/textures/error.png", true, Texture.RGB);
+        Texture texture = FileLoader.readPNGFile("res/textures/test.png", true, Texture.RGB);
+        Texture textureConcrete = FileLoader.readPNGFile("res/textures/concrete.png", false, Texture.RGB);
 
         Camera camera = new Camera(new Vector3f(0.0f, 0.0f, -3.0f), 45.0f, (float) WIDTH / HEIGHT);
 
@@ -244,18 +263,16 @@ public class TestRender {
 
             camera.getViewMatrix().identity().rotateX(mouseY).rotateY(mouseX).translate(-position.x, -position.y, -position.z);
 
-
             shader.setMatrix4("view", camera.getViewMatrix());
             shader.setMatrix4("proj", camera.getProjectionMatrix());
 
-            for (int i = 0; i < objectPositions.length; i++) {
-                object.getTransform().reset();
-                object.getTransform().translate(objectPositions[i]);
-                shader.setMatrix4("trans", object.getTransform().getMatrix());
+            shader.setMatrix4("trans", object.getTransform().getMatrix());
+            object.bindTexture(texture.getTextureID());
+            object.draw(shader);
 
-                object.bindTexture(texture.getTextureID());
-                object.draw(shader);
-            }
+            shader.setMatrix4("trans", playArea.getTransform().getMatrix());
+            playArea.bindTexture(textureConcrete.getTextureID());
+            playArea.draw(shader);
 
             window.swapBuffers();
 
