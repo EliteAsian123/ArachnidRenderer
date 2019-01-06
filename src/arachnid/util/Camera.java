@@ -5,11 +5,11 @@ import org.joml.Vector3f;
 
 public class Camera {
 
-    private Matrix4f viewMatrix;
+    private Transform viewMatrix;
     private Matrix4f projectionMatrix;
 
     public Camera(Vector3f startingPos, float fov, float aspect) {
-        viewMatrix = new Matrix4f();
+        viewMatrix = new Transform();
         viewMatrix.translate(startingPos);
 
         projectionMatrix = new Matrix4f();
@@ -17,6 +17,10 @@ public class Camera {
     }
 
     public Matrix4f getViewMatrix() {
+        return viewMatrix.getMatrix();
+    }
+
+    public Transform getTransform() {
         return viewMatrix;
     }
 

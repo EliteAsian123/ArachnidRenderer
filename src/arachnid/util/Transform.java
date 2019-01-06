@@ -3,25 +3,27 @@ package arachnid.util;
 import org.joml.Matrix4f;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class Transform {
 
     private Matrix4f matrix;
 
+    private Vector3f position;
+
     public Transform() {
         matrix = new Matrix4f();
+        position = new Vector3f();
     }
 
     public void translate(Vector3f vector) {
-        matrix.translate(vector);
+        position.add(vector);
+        matrix.identity().translate(position);
     }
 
     public void translate(float x, float y, float z) {
-        matrix.translate(x, y, z);
-    }
-
-    public void rotate(Quaternionfc quaternion) {
-        matrix.rotate(quaternion);
+        position.add(x, y, z);
+        matrix.identity().translate(position);
     }
 
     public void rotate(float angle, Vector3f axis) {
@@ -46,10 +48,15 @@ public class Transform {
 
     public void reset() {
         matrix.identity();
+        position = new Vector3f();
     }
 
     public Matrix4f getMatrix() {
         return matrix;
+    }
+
+    public Vector3f getPosition() {
+        return position;
     }
 
 }

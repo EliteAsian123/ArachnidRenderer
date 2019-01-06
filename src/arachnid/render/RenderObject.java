@@ -1,5 +1,6 @@
 package arachnid.render;
 
+import arachnid.util.ColorType;
 import arachnid.util.Transform;
 import org.lwjgl.BufferUtils;
 
@@ -101,6 +102,10 @@ public class RenderObject {
         return EBOid;
     }
 
+    public Transform getTransform() {
+        return transform;
+    }
+
     public void destroy() {
         glDeleteBuffers(VBOid);
         glDeleteBuffers(EBOid);
@@ -109,10 +114,6 @@ public class RenderObject {
         for (int object:OBO) {
             glDeleteBuffers(object);
         }
-    }
-
-    public Transform getTransform() {
-        return transform;
     }
 
 }

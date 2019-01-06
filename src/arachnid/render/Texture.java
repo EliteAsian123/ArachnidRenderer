@@ -11,18 +11,18 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class Texture {
 
-    public static int REPEAT = GL_REPEAT;
-    public static int MIRRORED_REPEAT = GL_MIRRORED_REPEAT;
-    public static int CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE;
+    public static final int REPEAT = GL_REPEAT;
+    public static final int MIRRORED_REPEAT = GL_MIRRORED_REPEAT;
+    public static final int CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE;
 
-    public static int LINEAR = GL_LINEAR;
-    public static int NEAREST = GL_NEAREST;
+    public static final int LINEAR = GL_LINEAR;
+    public static final int NEAREST = GL_NEAREST;
 
-    public static int MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR;
-    public static int MIPMAP_NEAREST = GL_NEAREST_MIPMAP_NEAREST;
+    public static final int MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR;
+    public static final int MIPMAP_NEAREST = GL_NEAREST_MIPMAP_NEAREST;
 
-    public static int RGB = GL_RGB;
-    public static int RGBA = GL_RGBA;
+    public static final int RGB = GL_RGB;
+    public static final int RGBA = GL_RGBA;
 
     public static void textureParam(int wrapMode, int minFilter, int magFilter) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);

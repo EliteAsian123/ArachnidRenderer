@@ -1,22 +1,16 @@
-import arachnid.render.Shader;
-import arachnid.render.RenderObject;
-import arachnid.render.Texture;
-import arachnid.render.Window;
-import arachnid.util.Camera;
-import arachnid.util.FileLoader;
-import arachnid.util.Time;
+import arachnid.render.*;
+import arachnid.util.*;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
 
 public class TestRender {
 
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
-    private static final String TITLE = "Arachnid Renderer V0.051";
+    private static final String TITLE = "Arachnid Renderer V0.06";
 
     private static float mouseX;
     private static float mouseY;
@@ -33,13 +27,11 @@ public class TestRender {
 
         GL.createCapabilities();
 
-        glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+        RenderManager.clearColor(0, 0.4f, 0.7f);
 
-        glFrontFace(GL_CW);
-        glCullFace(GL_BACK);
-        glEnable(GL_CULL_FACE);
+        RenderManager.cull(RenderManager.CLOCKWISE);
 
-        glEnable(GL_DEPTH_TEST);
+        RenderManager.enableDepthTest();
 
         GLFWCursorPosCallback cursorPosCallback;
 
@@ -147,73 +139,104 @@ public class TestRender {
 
         };
 
-        float[] verticesPlayArea = {
-                //FLOOR
-                1, 0, 1,
-                -1, 0, 1,
-                -1, 0, -1,
-                1, 0, -1,
+        float[] normal = {
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
 
-                //RAMP
-                0.5f, 0, 0,
-                0, 0, 0,
-                0, 0, -0.5f,
-                0.5f, 0, -0.5f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
 
-                0, 0.1f, -0.5f,
-                0.5f, 0.1f, -0.5f
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
 
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f
         };
 
-        int[] indicesPlayArea = {
+        float[] floorVertices = {
+                1f, 0f, 1f,
+                -1f, 0f, 1f,
+                -1f, 0f, -1f,
+                1f, 0f, -1f
+        };
+
+        int[] floorIndices = {
                 0, 1, 2,
                 2, 3, 0,
-
-                6, 7, 9,
-                9, 8, 6,
-
-                4, 9, 7,
-                5, 6, 8,
-
-                9, 4, 5,
-                5, 8, 9
         };
 
-        float[] otherDataPlayArea = {
-                //TEX COORDS
-                -10, -10,
-                10, -10,
+        float[] otherFloorData = {
+                0, 0,
+                10, 0,
                 10, 10,
-                -10, 10
-
-                //I'm not good with texture coords so I didn't add any for the ramp
+                0, 10
         };
 
-        Shader shader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader.vert"),
+        float[] floorNormals = {
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f
+        };
+
+        Shader lightShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader.vert"),
+                FileLoader.readTextFile("res/shaders/simpleShader_light.frag"));
+
+        Shader diffuseShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader_withNormal.vert"),
                 FileLoader.readTextFile("res/shaders/simpleShader.frag"));
 
         RenderObject object = new RenderObject(vertices, indices);
         object.addOBO(1, 2, otherData);
+        object.addOBO(2, 3, normal);
 
-        object.getTransform().translate(new Vector3f(-2, 0, -3));
+        object.getTransform().translate(new Vector3f(0, 0, -3));
 
-        RenderObject playArea = new RenderObject(verticesPlayArea, indicesPlayArea);
-        playArea.addOBO(1, 2, otherDataPlayArea);
+        RenderObject light = new RenderObject(vertices, indices);
 
-        playArea.getTransform().translate(new Vector3f(0, -0.5f, 0));
-        playArea.getTransform().scale(10);
+        RenderObject floor = new RenderObject(floorVertices, floorIndices);
+        floor.addOBO(1, 2, otherFloorData);
+        floor.addOBO(2, 3, floorNormals);
+
+        floor.getTransform().translate(new Vector3f(0, -0.5f, 0));
+        floor.getTransform().scale(10);
 
         Texture.textureParam(Texture.REPEAT, Texture.LINEAR, Texture.MIPMAP_LINEAR);
 
-        Texture texture = FileLoader.readPNGFile("res/textures/test.png", true, Texture.RGB);
+        Texture texture = FileLoader.readPNGFile("res/textures/error.png", true, Texture.RGB);
         Texture textureConcrete = FileLoader.readPNGFile("res/textures/concrete.png", false, Texture.RGB);
 
         Camera camera = new Camera(new Vector3f(0.0f, 0.0f, -3.0f), 45.0f, (float) WIDTH / HEIGHT);
+
+        Material material = new Material(Colors.WHITE, Colors.WHITE, Colors.GRAY, 16.0f);
+        material.setShaderNames("mat_ambient", "mat_diffuse", "mat_specular", "mat_shininess");
+
+        LightMaterial lightMaterial = new LightMaterial(Colors.RGB(220, 230, 240), new ColorType(0.5f, 0.5f, 0.5f), Colors.WHITE);
+        lightMaterial.setShaderNames("light_ambient", "light_diffuse", "light_specular");
 
         System.out.println("Done!");
 
         float movementSpeed = 2.5f;
         Vector3f position = new Vector3f();
+
+        float i = 0;
 
         while(window.windowOpen()) {
 
@@ -225,12 +248,14 @@ public class TestRender {
             Vector3f right = new Vector3f();
             camera.getViewMatrix().positiveX(right).mul(speed);
 
+            i += 1.0 * Time.getDelta();
+
             if (window.getKey(GLFW_KEY_1) == GLFW_PRESS) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                RenderManager.wireframe(false);
             }
 
             if (window.getKey(GLFW_KEY_2) == GLFW_PRESS) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                RenderManager.wireframe(true);
             }
 
             if (window.getKey(GLFW_KEY_W) == GLFW_PRESS) {
@@ -259,20 +284,41 @@ public class TestRender {
 
             Time.updateTime(true);
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            RenderManager.clear();
 
             camera.getViewMatrix().identity().rotateX(mouseY).rotateY(mouseX).translate(-position.x, -position.y, -position.z);
 
-            shader.setMatrix4("view", camera.getViewMatrix());
-            shader.setMatrix4("proj", camera.getProjectionMatrix());
+            lightShader.setMatrix4("view", camera.getViewMatrix());
+            lightShader.setMatrix4("proj", camera.getProjectionMatrix());
 
-            shader.setMatrix4("trans", object.getTransform().getMatrix());
-            object.bindTexture(texture.getTextureID());
-            object.draw(shader);
+            diffuseShader.setMatrix4("view", camera.getViewMatrix());
+            diffuseShader.setMatrix4("proj", camera.getProjectionMatrix());
 
-            shader.setMatrix4("trans", playArea.getTransform().getMatrix());
-            playArea.bindTexture(textureConcrete.getTextureID());
-            playArea.draw(shader);
+            lightMaterial.setShaderUniforms(diffuseShader);
+            lightMaterial.setShaderUniforms(lightShader);
+
+            diffuseShader.setVector3("lightPosition", light.getTransform().getPosition());
+
+            diffuseShader.setVector3("viewPos", position);
+
+            diffuseShader.setMatrix4("trans", object.getTransform().getMatrix());
+
+            material.setShaderUniforms(diffuseShader);
+
+            object.bindTexture(textureConcrete.getTextureID());
+            object.draw(diffuseShader);
+
+            diffuseShader.setMatrix4("trans", floor.getTransform().getMatrix());
+
+            floor.bindTexture(textureConcrete.getTextureID());
+            floor.draw(diffuseShader);
+
+            light.getTransform().reset();
+            light.getTransform().translate((float) Math.sin(i) * 2, 0, (float) Math.cos(i) * 2 - 3);
+            light.getTransform().scale(0.2f);
+
+            lightShader.setMatrix4("trans", light.getTransform().getMatrix());
+            light.draw(lightShader);
 
             window.swapBuffers();
 

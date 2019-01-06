@@ -2,6 +2,7 @@ package arachnid.render;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
@@ -16,9 +17,9 @@ import static org.lwjgl.system.MemoryStack.*;
 
 public class Window {
 
-    public static int FPS_NO_LIMIT = 0;
-    public static int FPS_NORMAL = 1;
-    public static int FPS_HALF = 2;
+    public static final int FPS_NO_LIMIT = 0;
+    public static final int FPS_NORMAL = 1;
+    public static final int FPS_HALF = 2;
 
     private int width;
     private int height;
