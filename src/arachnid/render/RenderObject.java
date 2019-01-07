@@ -72,7 +72,35 @@ public class RenderObject {
         glEnableVertexAttribArray(index);
     }
 
-    public void bindTexture(int id) {
+    public void bindTexture(int id, int textureID) {
+        switch (textureID) {
+            case 0:
+                glActiveTexture(GL_TEXTURE0);
+                break;
+            case 1:
+                glActiveTexture(GL_TEXTURE1);
+                break;
+            case 2:
+                glActiveTexture(GL_TEXTURE2);
+                break;
+            case 3:
+                glActiveTexture(GL_TEXTURE3);
+                break;
+            case 4:
+                glActiveTexture(GL_TEXTURE4);
+                break;
+            case 5:
+                glActiveTexture(GL_TEXTURE5);
+                break;
+            case 6:
+                glActiveTexture(GL_TEXTURE6);
+                break;
+            case 7:
+                glActiveTexture(GL_TEXTURE7);
+                break;
+            default:
+                System.err.println("You can only use up to 8 textures. Support for more will be added in the future.");
+        }
         glBindTexture(GL_TEXTURE_2D, id);
     }
 
@@ -80,6 +108,11 @@ public class RenderObject {
         glUseProgram(shader.getShaderProgram());
         glBindVertexArray(VAOid);
         glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
+    }
+
+    public void draw(Shader shader, Material material) {
+        material.setShaderUniforms(shader, this);
+        draw(shader);
     }
 
     public float[] getVertices() {

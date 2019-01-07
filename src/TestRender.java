@@ -1,8 +1,14 @@
 import arachnid.render.*;
+import arachnid.render.Window;
 import arachnid.util.*;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.opengl.GL;
+
+import javax.swing.*;
+
+import java.awt.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -10,10 +16,12 @@ public class TestRender {
 
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
-    private static final String TITLE = "Arachnid Renderer V0.06";
+    private static final String TITLE = "Arachnid Renderer V0.07";
 
     private static float mouseX;
     private static float mouseY;
+
+    private static boolean mouseDisabled = false;
 
     /*
                             CREDIT TO THE JOML FOR PROVIDING THE FIRSTPERSON SOURCE CODE.
@@ -27,7 +35,7 @@ public class TestRender {
 
         GL.createCapabilities();
 
-        RenderManager.clearColor(0, 0.4f, 0.7f);
+        RenderManager.clearColor(0.1f, 0.1f, 0.1f);
 
         RenderManager.cull(RenderManager.CLOCKWISE);
 
@@ -38,8 +46,24 @@ public class TestRender {
         glfwSetCursorPosCallback(window.getWindow(), cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
-                mouseX = (float) xpos / WIDTH;
-                mouseY = (float) ypos / HEIGHT;
+                if (!mouseDisabled) {
+                    mouseX = (float) xpos / WIDTH;
+                    mouseY = (float) ypos / HEIGHT;
+                }
+            }
+        });
+
+        GLFWMouseButtonCallback mouseButtonCallback;
+
+        glfwSetMouseButtonCallback(window.getWindow(), mouseButtonCallback = new GLFWMouseButtonCallback() {
+            @Override
+            public void invoke(long window, int button, int action, int mods) {
+                if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                    if (mouseDisabled) {
+                        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                        mouseDisabled = false;
+                    }
+                }
             }
         });
 
@@ -171,32 +195,6 @@ public class TestRender {
                 0.0f, -1.0f, 0.0f
         };
 
-        float[] floorVertices = {
-                1f, 0f, 1f,
-                -1f, 0f, 1f,
-                -1f, 0f, -1f,
-                1f, 0f, -1f
-        };
-
-        int[] floorIndices = {
-                0, 1, 2,
-                2, 3, 0,
-        };
-
-        float[] otherFloorData = {
-                0, 0,
-                10, 0,
-                10, 10,
-                0, 10
-        };
-
-        float[] floorNormals = {
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f
-        };
-
         Shader lightShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader.vert"),
                 FileLoader.readTextFile("res/shaders/simpleShader_light.frag"));
 
@@ -207,29 +205,28 @@ public class TestRender {
         object.addOBO(1, 2, otherData);
         object.addOBO(2, 3, normal);
 
-        object.getTransform().translate(new Vector3f(0, 0, -3));
-
         RenderObject light = new RenderObject(vertices, indices);
-
-        RenderObject floor = new RenderObject(floorVertices, floorIndices);
-        floor.addOBO(1, 2, otherFloorData);
-        floor.addOBO(2, 3, floorNormals);
-
-        floor.getTransform().translate(new Vector3f(0, -0.5f, 0));
-        floor.getTransform().scale(10);
 
         Texture.textureParam(Texture.REPEAT, Texture.LINEAR, Texture.MIPMAP_LINEAR);
 
-        Texture texture = FileLoader.readPNGFile("res/textures/error.png", true, Texture.RGB);
-        Texture textureConcrete = FileLoader.readPNGFile("res/textures/concrete.png", false, Texture.RGB);
+        Texture textureCrate = FileLoader.readPNGFile("res/textures/crate.png", true, Texture.RGB);
+        Texture textureCrateSpecular = FileLoader.readPNGFile("res/textures/crate_specular.png", true, Texture.RGB);
+        Texture texture = FileLoader.readPNGFile("res/textures/test.png", true, Texture.RGB);
 
         Camera camera = new Camera(new Vector3f(0.0f, 0.0f, -3.0f), 45.0f, (float) WIDTH / HEIGHT);
 
-        Material material = new Material(Colors.WHITE, Colors.WHITE, Colors.GRAY, 16.0f);
-        material.setShaderNames("mat_ambient", "mat_diffuse", "mat_specular", "mat_shininess");
+        Material material = new Material();
+        material.setShininess(32.0f);
+        material.setAmbientColor(Colors.RGB(64, 64, 64));
+        material.setDiffuseColor(Colors.RGB(82, 82, 82));
+        //material.setEmissionTexture(texture);
+        material.setDiffuseTexture(textureCrate);
+        material.setSpecularTexture(textureCrateSpecular);
 
-        LightMaterial lightMaterial = new LightMaterial(Colors.RGB(220, 230, 240), new ColorType(0.5f, 0.5f, 0.5f), Colors.WHITE);
-        lightMaterial.setShaderNames("light_ambient", "light_diffuse", "light_specular");
+        LightMaterial lightMaterial = new LightMaterial();
+        lightMaterial.setAmbientColor(Colors.RGB(64, 64, 64));
+        lightMaterial.setDiffuseColor(Colors.RGB(64, 64, 64));
+        lightMaterial.setSpecularColor(Colors.WHITE);
 
         System.out.println("Done!");
 
@@ -282,6 +279,11 @@ public class TestRender {
                 position.sub(new Vector3f(0, speed, 0));
             }
 
+            if (window.getKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+                glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                mouseDisabled = true;
+            }
+
             Time.updateTime(true);
 
             RenderManager.clear();
@@ -301,17 +303,15 @@ public class TestRender {
 
             diffuseShader.setVector3("viewPos", position);
 
+            object.getTransform().reset();
+            object.getTransform().translate(-0.75f, 0, -3);
             diffuseShader.setMatrix4("trans", object.getTransform().getMatrix());
+            object.draw(diffuseShader, material);
 
-            material.setShaderUniforms(diffuseShader);
-
-            object.bindTexture(textureConcrete.getTextureID());
-            object.draw(diffuseShader);
-
-            diffuseShader.setMatrix4("trans", floor.getTransform().getMatrix());
-
-            floor.bindTexture(textureConcrete.getTextureID());
-            floor.draw(diffuseShader);
+            object.getTransform().reset();
+            object.getTransform().translate(0.75f, 0, -3);
+            diffuseShader.setMatrix4("trans", object.getTransform().getMatrix());
+            object.draw(diffuseShader, material);
 
             light.getTransform().reset();
             light.getTransform().translate((float) Math.sin(i) * 2, 0, (float) Math.cos(i) * 2 - 3);
@@ -328,6 +328,8 @@ public class TestRender {
         object.destroy();
 
         window.destroy();
+
+        System.exit(0);
     }
 
 }

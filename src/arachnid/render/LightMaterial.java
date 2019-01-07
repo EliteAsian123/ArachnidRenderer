@@ -9,32 +9,28 @@ public class LightMaterial {
     private ColorType diffuseColor;
     private ColorType specularColor;
 
-    private String ambientColorName;
-    private String diffuseColorName;
-    private String specularColorName;
-
-    public LightMaterial(ColorType ambientColor, ColorType diffuseColor, ColorType specularColor) {
-        this.ambientColor = ambientColor;
-        this.diffuseColor = diffuseColor;
-        this.specularColor = specularColor;
-    }
-
     public LightMaterial() {
         ambientColor = Colors.WHITE;
         diffuseColor = Colors.WHITE;
         specularColor = Colors.WHITE;
     }
 
-    public void setShaderNames(String ambientColorName, String diffuseColorName, String specularColorName) {
-        this.ambientColorName = ambientColorName;
-        this.diffuseColorName = diffuseColorName;
-        this.specularColorName = specularColorName;
+    public void setAmbientColor(ColorType color) {
+        ambientColor = color;
+    }
+
+    public void setDiffuseColor(ColorType color) {
+        diffuseColor = color;
+    }
+
+    public void setSpecularColor(ColorType color) {
+        specularColor = color;
     }
 
     public void setShaderUniforms(Shader shader) {
-        shader.setColor3(ambientColorName, ambientColor);
-        shader.setColor3(diffuseColorName, diffuseColor);
-        shader.setColor3(specularColorName, specularColor);
+        shader.setColor3("light_ambient", ambientColor);
+        shader.setColor3("light_diffuse", diffuseColor);
+        shader.setColor3("light_specular", specularColor);
     }
 
 }
