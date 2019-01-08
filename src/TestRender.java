@@ -6,17 +6,13 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.opengl.GL;
 
-import javax.swing.*;
-
-import java.awt.*;
-
 import static org.lwjgl.glfw.GLFW.*;
 
 public class TestRender {
 
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
-    private static final String TITLE = "Arachnid Renderer V0.07";
+    private static final String TITLE = "Arachnid Renderer V0.071";
 
     private static float mouseX;
     private static float mouseY;
@@ -130,69 +126,36 @@ public class TestRender {
         };
 
         float[] otherData = {
-                //TEX COORDS
-                0, 0,
-                1, 0,
-                1, 1,
-                0, 1,
+                //TEX COORDS   //NORMALS
+                0, 0,          0, 0, 1,
+                1, 0,          0, 0, 1,
+                1, 1,          0, 0, 1,
+                0, 1,          0, 0, 1,
 
-                0, 0,
-                1, 0,
-                1, 1,
-                0, 1,
+                0, 0,          0, 0, -1,
+                1, 0,          0, 0, -1,
+                1, 1,          0, 0, -1,
+                0, 1,          0, 0, -1,
 
-                0, 0,
-                1, 0,
-                1, 1,
-                0, 1,
+                0, 0,          1, 0, 0,
+                1, 0,          1, 0, 0,
+                1, 1,          1, 0, 0,
+                0, 1,          1, 0, 0,
 
-                0, 0,
-                1, 0,
-                1, 1,
-                0, 1,
+                0, 0,          -1, 0, 0,
+                1, 0,          -1, 0, 0,
+                1, 1,          -1, 0, 0,
+                0, 1,          -1, 0, 0,
 
-                0, 0,
-                1, 0,
-                1, 1,
-                0, 1,
+                0, 0,          0, 1, 0,
+                1, 0,          0, 1, 0,
+                1, 1,          0, 1, 0,
+                0, 1,          0, 1, 0,
 
-                0, 0,
-                1, 0,
-                1, 1,
-                0, 1
-
-        };
-
-        float[] normal = {
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f,
-
-                0.0f, 0.0f, -1.0f,
-                0.0f, 0.0f, -1.0f,
-                0.0f, 0.0f, -1.0f,
-                0.0f, 0.0f, -1.0f,
-
-                1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f,
-
-                -1.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f,
-
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-
-                0.0f, -1.0f, 0.0f,
-                0.0f, -1.0f, 0.0f,
-                0.0f, -1.0f, 0.0f,
-                0.0f, -1.0f, 0.0f
+                0, 0,          0, -1, 0,
+                1, 0,          0, -1, 0,
+                1, 1,          0, -1, 0,
+                0, 1,          0, -1, 0
         };
 
         Shader lightShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader.vert"),
@@ -201,9 +164,7 @@ public class TestRender {
         Shader diffuseShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader_withNormal.vert"),
                 FileLoader.readTextFile("res/shaders/simpleShader.frag"));
 
-        RenderObject object = new RenderObject(vertices, indices);
-        object.addOBO(1, 2, otherData);
-        object.addOBO(2, 3, normal);
+        RenderObject object = new RenderObject(vertices, indices, otherData, new int[]{2, 3});
 
         RenderObject light = new RenderObject(vertices, indices);
 
@@ -217,14 +178,14 @@ public class TestRender {
 
         Material material = new Material();
         material.setShininess(32.0f);
-        material.setAmbientColor(Colors.RGB(64, 64, 64));
+        material.setAmbientColor(Colors.RGB(128, 128, 128));
         material.setDiffuseColor(Colors.RGB(82, 82, 82));
         //material.setEmissionTexture(texture);
         material.setDiffuseTexture(textureCrate);
         material.setSpecularTexture(textureCrateSpecular);
 
         LightMaterial lightMaterial = new LightMaterial();
-        lightMaterial.setAmbientColor(Colors.RGB(64, 64, 64));
+        lightMaterial.setAmbientColor(Colors.RGB(128, 128, 128));
         lightMaterial.setDiffuseColor(Colors.RGB(64, 64, 64));
         lightMaterial.setSpecularColor(Colors.WHITE);
 

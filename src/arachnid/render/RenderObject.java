@@ -3,10 +3,12 @@ package arachnid.render;
 import arachnid.util.ColorType;
 import arachnid.util.Transform;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.system.CallbackI;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -20,8 +22,7 @@ public class RenderObject {
     private int VBOid;
     private int VAOid;
     private int EBOid;
-
-    private List<Integer> OBO = new ArrayList<Integer>();
+    private int OBOid;
 
     private Transform transform;
 
@@ -31,6 +32,37 @@ public class RenderObject {
 
         transform = new Transform();
 
+        createBaseBuffers(vertices, indices);
+    }
+
+    public RenderObject(float vertices[], int indices[], float other[], int sizes[]) {
+        this.vertices = vertices;
+        this.indices = indices;
+
+        transform = new Transform();
+
+        createBaseBuffers(vertices, indices);
+
+        OBOid = glGenBuffers();
+
+        glBindBuffer(GL_ARRAY_BUFFER, OBOid);
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(other.length);
+        buffer.put(other);
+        buffer.flip();
+        glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+
+        int sum = IntStream.of(sizes).sum();
+        int offset = 0;
+
+        for (int i = 0; i < sizes.length; i++) {
+            glVertexAttribPointer(i + 1, sizes[i], GL_FLOAT, false, sum * 4, offset * 4);
+            glEnableVertexAttribArray(i + 1);
+            offset += sizes[i];
+        }
+
+    }
+
+    private void createBaseBuffers(float vertices[], int indices[]) {
         VAOid = glGenVertexArrays();
         VBOid = glGenBuffers();
         EBOid = glGenBuffers();
@@ -51,25 +83,6 @@ public class RenderObject {
 
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
-    }
-
-    public void addOBO(int index, int size, float[] data) {
-        int id = glGenBuffers();
-        OBO.add(id);
-
-        glBindBuffer(GL_ARRAY_BUFFER, id);
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
-        buffer.put(data);
-        buffer.flip();
-        glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
-
-        if (index == 0) {
-            System.err.println("OBO creation failed. Index 0 is taken.");
-            System.exit(-1);
-        }
-
-        glVertexAttribPointer(index, size, GL_FLOAT, false, 0, 0);
-        glEnableVertexAttribArray(index);
     }
 
     public void bindTexture(int id, int textureID) {
@@ -142,11 +155,8 @@ public class RenderObject {
     public void destroy() {
         glDeleteBuffers(VBOid);
         glDeleteBuffers(EBOid);
+        glDeleteBuffers(OBOid);
         glDeleteVertexArrays(VAOid);
-
-        for (int object:OBO) {
-            glDeleteBuffers(object);
-        }
     }
 
 }
