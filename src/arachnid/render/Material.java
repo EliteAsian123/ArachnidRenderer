@@ -1,13 +1,13 @@
 package arachnid.render;
 
+import arachnid.objects.ModelRenderer;
 import arachnid.util.ColorType;
 import arachnid.util.Colors;
 import arachnid.util.FileLoader;
-import org.lwjgl.system.CallbackI;
-
-import java.io.File;
 
 public class Material {
+
+    private Shader shader;
 
     private ColorType ambientColor;
     private ColorType diffuseColor;
@@ -20,7 +20,9 @@ public class Material {
     private Texture specularTexture;
     private Texture emissionTexture;
 
-    public Material() {
+    public Material(Shader shader) {
+        this.shader = shader;
+
         ambientColor = Colors.WHITE;
         diffuseColor = Colors.WHITE;
         specularColor = Colors.WHITE;
@@ -65,7 +67,11 @@ public class Material {
         emissionTexture = texture;
     }
 
-    public void setShaderUniforms(Shader shader, RenderObject object) {
+    public Shader getShader() {
+        return shader;
+    }
+
+    public void setShaderUniforms(Shader shader, ModelRenderer object) {
         shader.setColor3("mat_ambient", ambientColor);
         shader.setColor3("mat_diffuse", diffuseColor);
         shader.setColor3("mat_specular", specularColor);
@@ -80,6 +86,12 @@ public class Material {
         object.bindTexture(diffuseTexture.getTextureID(), 0);
         object.bindTexture(specularTexture.getTextureID(), 1);
         object.bindTexture(emissionTexture.getTextureID(), 2);
+    }
+
+    public void setLightShaderUniforms(Shader shader) {
+        shader.setColor3("light_ambient", ambientColor);
+        shader.setColor3("light_diffuse", diffuseColor);
+        shader.setColor3("light_specular", specularColor);
     }
 
 }

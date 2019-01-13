@@ -1,5 +1,6 @@
 package arachnid.util;
 
+import arachnid.render.Shader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -26,6 +27,11 @@ public class Camera {
 
     public Matrix4f getProjectionMatrix() {
         return projectionMatrix;
+    }
+
+    public void setShaderMatrices(Shader shader) {
+        shader.setMatrix4("view", getViewMatrix());
+        shader.setMatrix4("proj", getProjectionMatrix());
     }
 
 }

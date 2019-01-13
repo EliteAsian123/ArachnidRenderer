@@ -1,7 +1,9 @@
 package arachnid.render;
 
 import arachnid.util.ColorType;
-import org.lwjgl.system.CallbackI;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -9,6 +11,8 @@ public class RenderManager {
 
     public static final int CLOCKWISE = GL_CW;
     public static final int COUNTER_CLOCKWISE = GL_CCW;
+
+    public static List<Shader> shaders = new ArrayList<>();
 
     public static void clearColor(float red, float green, float blue) {
         glClearColor(red, green, blue, 1.0f);
@@ -42,6 +46,14 @@ public class RenderManager {
         } else {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
+    }
+
+    public static void addShader(Shader shader) {
+        shaders.add(shader);
+    }
+
+    public static List<Shader> getShaders() {
+        return shaders;
     }
 
 }

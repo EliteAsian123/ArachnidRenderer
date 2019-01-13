@@ -1,53 +1,55 @@
-package arachnid.render;
+package arachnid.objects;
 
-import arachnid.util.ColorType;
+import arachnid.render.Material;
 import arachnid.util.Transform;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.system.CallbackI;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.*;
 import java.util.stream.IntStream;
 
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class RenderObject {
+public class ModelRenderer extends Object {
 
-    private float vertices[];
-    private int indices[];
+    private float[] vertices;
+    private int[] indices;
 
     private int VBOid;
     private int VAOid;
     private int EBOid;
     private int OBOid;
 
-    private Transform transform;
+    private Material material;
 
-    public RenderObject(float vertices[], int indices[]) {
+    private WorldObject object;
+
+    public ModelRenderer(float[] vertices, int[] indices, Material material) {
         this.vertices = vertices;
         this.indices = indices;
+        this.material = material;
 
-        transform = new Transform();
 
-        createBaseBuffers(vertices, indices);
+        createBuffers(vertices, indices);
     }
 
-    public RenderObject(float vertices[], int indices[], float other[], int sizes[]) {
+    public ModelRenderer(float[] vertices, int[] indices, float[] otherData, int[] sizes, Material material) {
         this.vertices = vertices;
         this.indices = indices;
+        this.material = material;
 
-        transform = new Transform();
 
-        createBaseBuffers(vertices, indices);
+        createBuffers(vertices, indices);
 
         OBOid = glGenBuffers();
 
         glBindBuffer(GL_ARRAY_BUFFER, OBOid);
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(other.length);
-        buffer.put(other);
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(otherData.length);
+        buffer.put(otherData);
         buffer.flip();
         glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
 
@@ -59,10 +61,9 @@ public class RenderObject {
             glEnableVertexAttribArray(i + 1);
             offset += sizes[i];
         }
-
     }
 
-    private void createBaseBuffers(float vertices[], int indices[]) {
+    private void createBuffers(float[] vertices, int[] indices) {
         VAOid = glGenVertexArrays();
         VBOid = glGenBuffers();
         EBOid = glGenBuffers();
@@ -83,6 +84,26 @@ public class RenderObject {
 
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
+    }
+
+    public float[] getVertices() {
+        return vertices;
+    }
+
+    public int[] getIndices() {
+        return indices;
+    }
+
+    public int getVBOid() {
+        return VBOid;
+    }
+
+    public int getVAOid() {
+        return VAOid;
+    }
+
+    public int getEBOid() {
+        return EBOid;
     }
 
     public void bindTexture(int id, int textureID) {
@@ -117,39 +138,14 @@ public class RenderObject {
         glBindTexture(GL_TEXTURE_2D, id);
     }
 
-    public void draw(Shader shader) {
-        glUseProgram(shader.getShaderProgram());
+    public void draw(WorldObject parent) {
+        material.setShaderUniforms(material.getShader(), this);
+
+        material.getShader().setMatrix4("trans", parent.getTransform().getMatrix());
+
+        glUseProgram(material.getShader().getShaderProgram());
         glBindVertexArray(VAOid);
         glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
-    }
-
-    public void draw(Shader shader, Material material) {
-        material.setShaderUniforms(shader, this);
-        draw(shader);
-    }
-
-    public float[] getVertices() {
-        return vertices;
-    }
-
-    public int[] getIndices() {
-        return indices;
-    }
-
-    public int getVertexVBOid() {
-        return VBOid;
-    }
-
-    public int getVAOid() {
-        return VAOid;
-    }
-
-    public int getEBOid() {
-        return EBOid;
-    }
-
-    public Transform getTransform() {
-        return transform;
     }
 
     public void destroy() {

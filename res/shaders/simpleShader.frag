@@ -10,7 +10,7 @@ uniform sampler2D texture_diffuse;
 uniform sampler2D texture_specular;
 uniform sampler2D texture_emission;
 
-uniform vec3 lightPosition;
+uniform vec3 light_pos;
 uniform vec3 viewPos;
 
 uniform vec3 mat_ambient;
@@ -28,7 +28,7 @@ void main() {
     vec3 ambient = light_ambient * (mat_ambient * vec3(texture(texture_diffuse, TexCoord)));
   	
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPosition - FragPosition);
+    vec3 lightDir = normalize(light_pos - FragPosition);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light_diffuse * (diff * mat_diffuse) * vec3(texture(texture_diffuse, TexCoord));
 	

@@ -1,9 +1,6 @@
 package arachnid.util;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionfc;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 
 public class Transform {
 
@@ -14,6 +11,18 @@ public class Transform {
     public Transform() {
         matrix = new Matrix4f();
         position = new Vector3f();
+    }
+
+    public Transform(Vector3f vector) {
+        matrix = new Matrix4f();
+        position = new Vector3f();
+        translate(vector);
+    }
+
+    public Transform(float x, float y, float z) {
+        matrix = new Matrix4f();
+        position = new Vector3f();
+        translate(new Vector3f(x, y, z));
     }
 
     public void translate(Vector3f vector) {

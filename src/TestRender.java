@@ -1,3 +1,4 @@
+import arachnid.objects.*;
 import arachnid.render.*;
 import arachnid.render.Window;
 import arachnid.util.*;
@@ -12,7 +13,7 @@ public class TestRender {
 
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
-    private static final String TITLE = "Arachnid Renderer V0.071";
+    private static final String TITLE = "Arachnid Renderer V0.08";
 
     private static float mouseX;
     private static float mouseY;
@@ -22,7 +23,7 @@ public class TestRender {
     /*
                             CREDIT TO THE JOML FOR PROVIDING THE FIRSTPERSON SOURCE CODE.
         https://github.com/JOML-CI/joml-lwjgl3-demos/blob/master/src/org/joml/lwjgl/FirstPersonCameraDemo.java
-     */
+    */
 
     public static void main(String[] args) {
         System.out.println("Starting Arachnid...");
@@ -164,9 +165,7 @@ public class TestRender {
         Shader diffuseShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader_withNormal.vert"),
                 FileLoader.readTextFile("res/shaders/simpleShader.frag"));
 
-        RenderObject object = new RenderObject(vertices, indices, otherData, new int[]{2, 3});
-
-        RenderObject light = new RenderObject(vertices, indices);
+        RenderManager.addShader(diffuseShader);
 
         Texture.textureParam(Texture.REPEAT, Texture.LINEAR, Texture.MIPMAP_LINEAR);
 
@@ -176,7 +175,7 @@ public class TestRender {
 
         Camera camera = new Camera(new Vector3f(0.0f, 0.0f, -3.0f), 45.0f, (float) WIDTH / HEIGHT);
 
-        Material material = new Material();
+        Material material = new Material(diffuseShader);
         material.setShininess(32.0f);
         material.setAmbientColor(Colors.RGB(128, 128, 128));
         material.setDiffuseColor(Colors.RGB(82, 82, 82));
@@ -184,10 +183,23 @@ public class TestRender {
         material.setDiffuseTexture(textureCrate);
         material.setSpecularTexture(textureCrateSpecular);
 
-        LightMaterial lightMaterial = new LightMaterial();
+        Material lightMaterial = new Material(lightShader);
         lightMaterial.setAmbientColor(Colors.RGB(128, 128, 128));
         lightMaterial.setDiffuseColor(Colors.RGB(64, 64, 64));
         lightMaterial.setSpecularColor(Colors.WHITE);
+
+        WorldObject object = new WorldObject();
+        ModelRenderer model = new ModelRenderer(vertices, indices, otherData, new int[]{2, 3}, material);
+        object.getTransform().translate(0, 0, -2);
+        object.attach(model);
+
+        WorldObject light = new WorldObject();
+        ModelRenderer model_simple = new ModelRenderer(vertices, indices, lightMaterial);
+        PointLight pointLight = new PointLight(lightMaterial);
+        light.getTransform().translate(1, 1, -3);
+        light.getTransform().scale(0.2f);
+        light.attach(model_simple);
+        light.attach(pointLight);
 
         System.out.println("Done!");
 
@@ -251,35 +263,22 @@ public class TestRender {
 
             camera.getViewMatrix().identity().rotateX(mouseY).rotateY(mouseX).translate(-position.x, -position.y, -position.z);
 
-            lightShader.setMatrix4("view", camera.getViewMatrix());
-            lightShader.setMatrix4("proj", camera.getProjectionMatrix());
+            camera.setShaderMatrices(lightShader);
 
-            diffuseShader.setMatrix4("view", camera.getViewMatrix());
-            diffuseShader.setMatrix4("proj", camera.getProjectionMatrix());
+            camera.setShaderMatrices(diffuseShader);
 
-            lightMaterial.setShaderUniforms(diffuseShader);
-            lightMaterial.setShaderUniforms(lightShader);
-
-            diffuseShader.setVector3("lightPosition", light.getTransform().getPosition());
+            lightMaterial.setLightShaderUniforms(diffuseShader);
+            lightMaterial.setLightShaderUniforms(lightShader);
 
             diffuseShader.setVector3("viewPos", position);
 
-            object.getTransform().reset();
-            object.getTransform().translate(-0.75f, 0, -3);
-            diffuseShader.setMatrix4("trans", object.getTransform().getMatrix());
-            object.draw(diffuseShader, material);
+            object.draw();
+            light.draw();
 
-            object.getTransform().reset();
-            object.getTransform().translate(0.75f, 0, -3);
-            diffuseShader.setMatrix4("trans", object.getTransform().getMatrix());
-            object.draw(diffuseShader, material);
+            Transform transform = new Transform((float) Math.sin(i) * 2, 0, (float) Math.cos(i) * 2 - 2);
+            transform.scale(0.2f);
 
-            light.getTransform().reset();
-            light.getTransform().translate((float) Math.sin(i) * 2, 0, (float) Math.cos(i) * 2 - 3);
-            light.getTransform().scale(0.2f);
-
-            lightShader.setMatrix4("trans", light.getTransform().getMatrix());
-            light.draw(lightShader);
+            light.setTransform(transform);
 
             window.swapBuffers();
 
