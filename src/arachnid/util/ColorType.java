@@ -28,7 +28,7 @@ public class ColorType {
         a = 1.0f;
     }
 
-    public String getString() {
+    public String toString() {
         return "RGB: " + r + ", " + g + ", " + b;
     }
 

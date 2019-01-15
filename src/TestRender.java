@@ -13,7 +13,7 @@ public class TestRender {
 
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
-    private static final String TITLE = "Arachnid Renderer V0.08";
+    private static final String TITLE = "Arachnid Renderer V0.081";
 
     private static float mouseX;
     private static float mouseY;
@@ -162,10 +162,13 @@ public class TestRender {
         Shader lightShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader.vert"),
                 FileLoader.readTextFile("res/shaders/simpleShader_light.frag"));
 
-        Shader diffuseShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader_withNormal.vert"),
+        Shader simpleShader = new Shader(FileLoader.readTextFile("res/shaders/simpleShader_withNormal.vert"),
                 FileLoader.readTextFile("res/shaders/simpleShader.frag"));
 
-        RenderManager.addShader(diffuseShader);
+        RenderManager.addShader(simpleShader);
+        RenderManager.addShader(lightShader);
+
+        RenderManager.addShader(simpleShader);
 
         Texture.textureParam(Texture.REPEAT, Texture.LINEAR, Texture.MIPMAP_LINEAR);
 
@@ -173,9 +176,7 @@ public class TestRender {
         Texture textureCrateSpecular = FileLoader.readPNGFile("res/textures/crate_specular.png", true, Texture.RGB);
         Texture texture = FileLoader.readPNGFile("res/textures/test.png", true, Texture.RGB);
 
-        Camera camera = new Camera(new Vector3f(0.0f, 0.0f, -3.0f), 45.0f, (float) WIDTH / HEIGHT);
-
-        Material material = new Material(diffuseShader);
+        Material material = new Material(simpleShader);
         material.setShininess(32.0f);
         material.setAmbientColor(Colors.RGB(128, 128, 128));
         material.setDiffuseColor(Colors.RGB(82, 82, 82));
@@ -185,8 +186,8 @@ public class TestRender {
 
         Material lightMaterial = new Material(lightShader);
         lightMaterial.setAmbientColor(Colors.RGB(128, 128, 128));
-        lightMaterial.setDiffuseColor(Colors.RGB(64, 64, 64));
         lightMaterial.setSpecularColor(Colors.WHITE);
+        lightMaterial.calculateLightDiffuse();
 
         WorldObject object = new WorldObject();
         ModelRenderer model = new ModelRenderer(vertices, indices, otherData, new int[]{2, 3}, material);
@@ -201,6 +202,10 @@ public class TestRender {
         light.attach(model_simple);
         light.attach(pointLight);
 
+        WorldObject player = new WorldObject();
+        Camera camera = new Camera(45.0f, (float) WIDTH / HEIGHT);
+        player.attach(camera);
+
         System.out.println("Done!");
 
         float movementSpeed = 2.5f;
@@ -213,10 +218,10 @@ public class TestRender {
             float speed = movementSpeed * (float) Time.getDelta();
 
             Vector3f front = new Vector3f();
-            camera.getViewMatrix().positiveZ(front).negate().mul(speed);
+            player.getTransform().getMatrix().positiveZ(front).negate().mul(speed);
 
             Vector3f right = new Vector3f();
-            camera.getViewMatrix().positiveX(right).mul(speed);
+            player.getTransform().getMatrix().positiveX(right).mul(speed);
 
             i += 1.0 * Time.getDelta();
 
@@ -261,16 +266,14 @@ public class TestRender {
 
             RenderManager.clear();
 
-            camera.getViewMatrix().identity().rotateX(mouseY).rotateY(mouseX).translate(-position.x, -position.y, -position.z);
+            player.getTransform().getMatrix().identity().rotateX(mouseY).rotateY(mouseX).translate(-position.x, -position.y, -position.z);
 
-            camera.setShaderMatrices(lightShader);
+            player.draw();
 
-            camera.setShaderMatrices(diffuseShader);
-
-            lightMaterial.setLightShaderUniforms(diffuseShader);
+            lightMaterial.setLightShaderUniforms(simpleShader);
             lightMaterial.setLightShaderUniforms(lightShader);
 
-            diffuseShader.setVector3("viewPos", position);
+            simpleShader.setVector3("viewPos", position);
 
             object.draw();
             light.draw();
@@ -286,6 +289,8 @@ public class TestRender {
         }
 
         object.destroy();
+        light.destroy();
+        player.destroy();
 
         window.destroy();
 

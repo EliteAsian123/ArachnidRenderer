@@ -28,4 +28,44 @@ public class Colors {
         return new ColorType((float) r / 255, (float) g / 255, (float) b / 255, (float) a / 255);
     }
 
+    public static ColorType add(ColorType a, ColorType b) {
+        ColorType out = new ColorType(a.r + b.r, a.g + b.g, a.b + b.b);
+
+        if (out.r > 1) {
+            out.r = 1;
+        }
+
+        if (out.g > 1) {
+            out.g = 1;
+        }
+
+        if (out.b > 1) {
+            out.b = 1;
+        }
+
+        return out;
+    }
+
+    public static ColorType sub(ColorType a, ColorType b) {
+        ColorType out = new ColorType(a.r - b.r, a.g - b.g, a.b - b.b);
+
+        if (out.r < 0) {
+            out.r = 0;
+        }
+
+        if (out.g < 0) {
+            out.g = 0;
+        }
+
+        if (out.b < 0) {
+            out.b = 0;
+        }
+
+        return out;
+    }
+
+    public static ColorType div(ColorType color, float num) {
+        return new ColorType(color.r / num, color.g / num, color.b / num);
+    }
+
 }

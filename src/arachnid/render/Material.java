@@ -47,6 +47,10 @@ public class Material {
         diffuseColor = color;
     }
 
+    public void calculateLightDiffuse() {
+        diffuseColor = Colors.sub(ambientColor, Colors.div(specularColor, 4));
+    }
+
     public void setDiffuseTexture(Texture texture) {
         diffuseTexture = texture;
     }

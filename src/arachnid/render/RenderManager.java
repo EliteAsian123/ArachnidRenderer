@@ -1,6 +1,8 @@
 package arachnid.render;
 
 import arachnid.util.ColorType;
+import arachnid.util.Transform;
+import org.lwjgl.system.CallbackI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,9 @@ public class RenderManager {
     public static final int CLOCKWISE = GL_CW;
     public static final int COUNTER_CLOCKWISE = GL_CCW;
 
-    public static List<Shader> shaders = new ArrayList<>();
+    private static List<Shader> lightEffectedShaders = new ArrayList<>();
+    private static List<Shader> shaders = new ArrayList<>();
+    private static Transform directionalLightTransform = new Transform();
 
     public static void clearColor(float red, float green, float blue) {
         glClearColor(red, green, blue, 1.0f);
@@ -54,6 +58,22 @@ public class RenderManager {
 
     public static List<Shader> getShaders() {
         return shaders;
+    }
+
+    public static void addLightEffectedShader(Shader shader) {
+        lightEffectedShaders.add(shader);
+    }
+
+    public static List<Shader> getLightEffectedShaders() {
+        return shaders;
+    }
+
+    public static void SetDirectionalLightTransform(Transform transform) {
+        directionalLightTransform = transform;
+    }
+
+    public static Transform getDirectionalLightTransform() {
+        return directionalLightTransform;
     }
 
 }
