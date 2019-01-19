@@ -11,3 +11,7 @@ Quality is reduced because they are GIFs.<br />
 <br />
 GIF of v0.07
 ![GIF of v0.07](https://raw.githubusercontent.com/LavaSnakeGaming/ArachnidRenderer/master/screenshots/0.07.gif)
+<br />
+GIF of v0.081
+<br />
+![GIF of v0.081](https://raw.githubusercontent.com/LavaSnakeGaming/ArachnidRenderer/master/screenshots/0.081.gif)
